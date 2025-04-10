@@ -1,9 +1,12 @@
 import express from "express";
-import { getAllUsers, getOneById } from "../controllers/usersControllers.js";
+import { createReview, deleteReview, getAllReviews, getOneById, updateReview } from "../controllers/reviewControllers.js";
 
 const router = express.Router();
 
-router.get("/", getAllUsers)
+router.get("/", getAllReviews)
 router.get("/:id", getOneById)
+router.post("/", createReview)
+router.put("/:id", updateReview)
+router.delete("/:id", deleteReview)
 
-export default router
+export { router as reviewRouter}

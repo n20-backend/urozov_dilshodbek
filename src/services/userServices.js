@@ -50,7 +50,7 @@ export const updateUser = async (id, body) => {
         const oldUser = oldUserResult.rows[0];
 
         if (!oldUser) {
-            throw new Error("User not found");
+            throw new Error("Foydalanuvchi topilmadi");
         }
 
         
@@ -60,8 +60,8 @@ export const updateUser = async (id, body) => {
             password: body.password ? await bcrypt.hash(body.password, 10) : oldUser.password,
             role: body.role || oldUser.role,
             status: body.status || oldUser.status,
-            created_at: oldUser.created_at,  
-            updated_at: new Date().toISOString() 
+            createdAt: oldUser.createdAt,  
+            updatedAt: new Date().toISOString() 
         };
 
         const query = `UPDATE users SET 
@@ -80,7 +80,7 @@ export const updateUser = async (id, body) => {
             updatedUser.password, 
             updatedUser.role, 
             updatedUser.status, 
-            updatedUser.updated_at, 
+            updatedUser.updatedAt, 
             id
         ];
 
@@ -95,5 +95,20 @@ export const updateUser = async (id, body) => {
     }
 };
 
+export const deleteUser = async (id) => {
+    try {
+        const result = await Client.query(
+            'DELETE FROM users WHERE id = $1 RETURNING id',
+            [id]
+        );
 
+        if (result.rows.length === 0) {
+            return null; // user topilmadi
+        }
 
+        return result.rows[0]; // o‘chirilgan user id'sini qaytarish
+    } catch (error) {
+        console.error("Error deleting user:", error);
+        throw error;
+    }
+}

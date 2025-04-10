@@ -1,4 +1,4 @@
-CREATE DATABASE exam;
++CREATE DATABASE exam;
 
 CREATE TABLE company (
     id UUID PRIMARY KEY DEFAULT GEN_RANDOM_UUID(),
@@ -68,10 +68,40 @@ CREATE TABLE job_listing (
     status job_listing_status NOT NULL,
     postedBy UUID NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (companyId) REFERENCES Company(id),
-    FOREIGN KEY (postedBy) REFERENCES Users(id)
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (companyId) REFERENCES company(id) ON DELETE CASCADE,
+    FOREIGN KEY (postedBy) REFERENCES users(id) ON DELETE CASCADE
 );
+
+INSERT INTO job_listing (
+  title, description, companyId, location, salaryRange, requirements, status, postedBy
+) VALUES
+('Frontend Developer', 'React va Tailwind bilan ishlay oladigan developer kerak.', 
+ (SELECT id FROM company limit 1), 'Tashkent', 
+ '{"min": 1000, "max": 2000}', '["React", "Tailwind", "REST APIs"]', 'open', 
+ (SELECT id FROM users limit 1)),
+
+('Backend Developer', 'Node.js va PostgreSQL bo''yicha tajribali dasturchi.', 
+ (SELECT id FROM company limit 1 OFFSET 1), 'Samarkand', 
+ '{"min": 1200, "max": 2500}', '["Node.js", "PostgreSQL", "Docker"]', 'open', 
+ (SELECT id FROM users LIMIT 1 OFFSET 1)),
+
+('DevOps Engineer', 'CI/CD va AWS bo''yicha malakali mutaxassis.', 
+ (SELECT id FROM company limit 1 OFFSET 2), 'Remote', 
+ '{"min": 2000, "max": 3000}', '["AWS", "Terraform", "CI/CD"]', 'open', 
+ (SELECT id FROM users LIMIT 1 OFFSET 2)),
+
+('QA Engineer', 'Test yozish, avtomatlashtirish.', 
+ (SELECT id FROM company limit 1 OFFSET 3), 'Bukhara', 
+ '{"min": 1000, "max": 1800}', '["Selenium", "Cypress", "Manual Testing"]', 'closed', 
+ (SELECT id FROM users LIMIT 1 OFFSET 3)),
+
+('Full Stack Developer', 'Frontend va Backendni birday qamrab oladigan dasturchi.', 
+ (SELECT id FROM company limit 1 OFFSET 4), 'Tashkent', 
+ '{"min": 1500, "max": 2800}', '["React", "Node.js", "MongoDB"]', 'open', 
+ (SELECT id FROM users LIMIT 1 OFFSET 4));
+
+
 
 CREATE TYPE application_status AS ENUM ('submitted', 'reviewed', 'interviewing', 'hired', 'rejected');
 CREATE TABLE application (
@@ -82,12 +112,31 @@ CREATE TABLE application (
     coverLetter TEXT,
     status application_status NOT NULL DEFAULT 'submitted',
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (jobId) REFERENCES JobListing(id),
-    FOREIGN KEY (userId) REFERENCES Users(id)
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (jobId) REFERENCES job_listing(id) ON DELETE CASCADE,
+    FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TYPE review_status AS ENUM ('approved', 'pending', 'rejected')
+INSERT INTO application (
+  jobId, userId, resumeUrl, coverLetter, status
+) VALUES
+((SELECT id FROM job_listing LIMIT 1), (SELECT id  FROM users LIMIT 1),
+ 'https://example.com/resumes/john_doe.pdf', 'I am excited to apply for this role.', 'submitted'),
+
+((SELECT id FROM job_listing LIMIT 1 OFFSET 1), (SELECT id  FROM users LIMIT 1 OFFSET 1),
+ 'https://example.com/resumes/jane_smith.pdf', 'Looking forward to contributing to your team.', 'reviewed'),
+
+((SELECT id FROM job_listing LIMIT 1 OFFSET 2), (SELECT id  FROM users LIMIT 1 OFFSET 2),
+ 'https://example.com/resumes/ali_khan.pdf', 'Please find my resume attached.', 'interviewing'),
+
+((SELECT id FROM job_listing LIMIT 1 OFFSET 3), (SELECT id  FROM users LIMIT 1 OFFSET 3),
+ 'https://example.com/resumes/sara_lee.pdf', 'I believe I am a great fit for this position.', 'hired'),
+
+((SELECT id FROM job_listing LIMIT 1 OFFSET 4), (SELECT id  FROM users LIMIT 1 OFFSET 4),
+ 'https://example.com/resumes/mike_tyson.pdf', 'This opportunity perfectly aligns with my skills.', 'rejected');
+
+
+CREATE TYPE review_status AS ENUM ('approved', 'pending', 'rejected');
 CREATE TABLE review (
     id UUID PRIMARY KEY DEFAULT GEN_RANDOM_UUID(),
     companyId UUID NOT NULL,
@@ -96,8 +145,25 @@ CREATE TABLE review (
     comment TEXT,
     status review_status NOT NULL DEFAULT 'pending',
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (companyId) REFERENCES Company(id),
-    FOREIGN KEY (userId) REFERENCES Users(id)
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (companyId) REFERENCES Company(id)  ON DELETE CASCADE,
+    FOREIGN KEY (userId) REFERENCES Users(id)  ON DELETE CASCADE
 );
 
+INSERT INTO review (
+  companyId, userId, rating, comment, status
+) VALUES
+((SELECT id FROM company LIMIT 1), (SELECT id FROM users LIMIT 1),
+ 5, 'Juda yaxshi kompaniya. Ish muhitidan mamnunman.', 'approved'),
+
+((SELECT id FROM company LIMIT 1 OFFSET 1), (SELECT id FROM users LIMIT 1 OFFSET 1),
+ 4, 'Rahbariyat yaxshi, lekin ish yuklamasi ko''p.', 'pending'),
+
+((SELECT id FROM company LIMIT 1 OFFSET 2), (SELECT id FROM users LIMIT 1 OFFSET 2),
+ 3, 'O''rtacha tajriba. Yaxshi ham, yomon ham emas.', 'rejected'),
+
+((SELECT id FROM company LIMIT 1 OFFSET 3), (SELECT id FROM users LIMIT 1 OFFSET 3),
+ 2, 'Vaqtida ish haqi to''lanmaydi. Yaxshilanish kerak.', 'pending'),
+
+((SELECT id FROM company LIMIT 1 OFFSET 4), (SELECT id FROM users LIMIT 1 OFFSET 4),
+ 5, 'Zo''r jamoa va yaxshi rahbariyat!', 'approved');

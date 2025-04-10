@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start":"server.js",
+    "start": "server.js",
     "start:dev": "node --watch server.js"
   },
   "keywords": [],
@@ -16,6 +16,7 @@
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
+    "joi": "^17.13.3",
     "pg": "^8.14.1"
   }
 }

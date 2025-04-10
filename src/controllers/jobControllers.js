@@ -1,9 +1,8 @@
-import * as appServices from "../services/appServices.js"
-
-export const getAllApps = async (req, res) => {
+import * as jobServices from "../services/jobServices.js"
+export const getAllJob = async (req, res) => {
     try {
-        const apps = await appServices.getAllApps();
-        res.json(apps)
+        const jobs = await jobServices.getAllJobs();
+        res.json(jobs)
     } catch (error) {
         console.error('Error fetching users;', error);
         res.status(500).json({error: 'An error occurred on the server.'})
@@ -13,9 +12,9 @@ export const getAllApps = async (req, res) => {
 export const getOneById = async (req, res) => {
     const { id } = req.params;
     try {
-        const app = await appServices.getOneById(id);
-        if(app) {
-            res.json(app);
+        const job = await jobServices.getOneById(id);
+        if(job) {
+            res.json(job);
         }
         else{
             res.status(404).json({error:'Users not found'})
@@ -26,12 +25,12 @@ export const getOneById = async (req, res) => {
     }
 };
 
-export const createApp = async (req, res) => {
+export const createJobs = async (req, res) => {
     const body = req.body;
     try {
-        const company = await appServices.createApp(body);
-        if(company){
-            res.status(201).send(company);
+        const job = await jobServices.createJobs(body);
+        if(job){
+            res.status(201).send(job);
         }
     } catch (error) {
         console.log(error);
@@ -39,7 +38,7 @@ export const createApp = async (req, res) => {
     }
 };
 
-export const updatedApp = async (req, res) => {
+export const updatedJob = async (req, res) => {
     const body = req.body;
     const { id } = req.params;
     
@@ -49,9 +48,9 @@ export const updatedApp = async (req, res) => {
     }
 
     try {
-        const company = await appServices.updateApp(id, body);
-        if (company) {
-            res.status(200).json(company); 
+        const job = await jobServices.updatedJob(id, body);
+        if (job) {
+            res.status(200).json(job); 
         } else {
             res.status(404).json({ error: 'User not found' });
         }
@@ -61,13 +60,13 @@ export const updatedApp = async (req, res) => {
     }
 };
 
-export const deleteApp = async (req, res) => {
+export const deleteJob = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const company = await appServices.deleteApp(id);
-        if (company) {
-            res.status(200).json(company);             
+        const user = await jobServices.deleteJob(id);
+        if (user) {
+            res.status(200).json(user);             
         } else {
             res.status(404).json({ error: 'User not found' });
         }
